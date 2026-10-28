@@ -1,0 +1,73 @@
+{
+  "payload": {
+    "export": "cart-lines-discounts-generate-run",
+    "target": "cart.lines.discounts.generate.run",
+    "input": {
+      "presentmentCurrencyRate": "1.0",
+      "cart": {
+        "lines": [
+          {
+            "id": "gid://shopify/CartLine/1",
+            "quantity": 2,
+            "cost": { "amountPerQuantity": { "amount": "30.0" } },
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": { "id": "gid://shopify/Product/1", "inAnyCollection": false }
+            }
+          },
+          {
+            "id": "gid://shopify/CartLine/2",
+            "quantity": 1,
+            "cost": { "amountPerQuantity": { "amount": "20.0" } },
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": { "id": "gid://shopify/Product/2", "inAnyCollection": false }
+            }
+          },
+          {
+            "id": "gid://shopify/CartLine/3",
+            "quantity": 5,
+            "cost": { "amountPerQuantity": { "amount": "99.0" } },
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": { "id": "gid://shopify/Product/999", "inAnyCollection": false }
+            }
+          }
+        ]
+      },
+      "discount": {
+        "discountClasses": ["PRODUCT"],
+        "metafield": {
+          "jsonValue": {
+            "quantity": 3,
+            "bundlePrice": "55.00",
+            "productIds": ["gid://shopify/Product/1", "gid://shopify/Product/2"],
+            "collectionIds": [],
+            "message": "3 for £55"
+          }
+        }
+      }
+    },
+    "output": {
+      "operations": [
+        {
+          "productDiscountsAdd": {
+            "candidates": [
+              {
+                "message": "3 for £55",
+                "targets": [{ "cartLine": { "id": "gid://shopify/CartLine/1", "quantity": 2 } }],
+                "value": { "fixedAmount": { "amount": "18.76", "appliesToEachItem": false } }
+              },
+              {
+                "message": "3 for £55",
+                "targets": [{ "cartLine": { "id": "gid://shopify/CartLine/2", "quantity": 1 } }],
+                "value": { "fixedAmount": { "amount": "6.24", "appliesToEachItem": false } }
+              }
+            ],
+            "selectionStrategy": "ALL"
+          }
+        }
+      ]
+    }
+  }
+}

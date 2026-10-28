@@ -16,6 +16,10 @@ const shopify = shopifyApp({
   authPathPrefix: "/auth",
   sessionStorage: new PrismaSessionStorage(prisma),
   distribution: AppDistribution.AppStore,
+  // Online tokens carry the staff member who is browsing (name and email) on
+  // the session, which is what the change log records. The offline token is
+  // still stored alongside and is what webhooks and background work use.
+  useOnlineTokens: true,
   future: {
     expiringOfflineAccessTokens: true,
   },

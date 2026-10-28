@@ -1,0 +1,50 @@
+{
+  "payload": {
+    "export": "cart-lines-discounts-generate-run",
+    "target": "cart.lines.discounts.generate.run",
+    "input": {
+      "presentmentCurrencyRate": "1.0",
+      "cart": {
+        "lines": [
+          {
+            "id": "gid://shopify/CartLine/1",
+            "quantity": 4,
+            "cost": { "amountPerQuantity": { "amount": "25.0" } },
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": { "id": "gid://shopify/Product/5", "inAnyCollection": true }
+            }
+          }
+        ]
+      },
+      "discount": {
+        "discountClasses": ["PRODUCT"],
+        "metafield": {
+          "jsonValue": {
+            "quantity": 3,
+            "bundlePrice": "55.00",
+            "productIds": [],
+            "collectionIds": ["gid://shopify/Collection/1"],
+            "message": "3 for £55"
+          }
+        }
+      }
+    },
+    "output": {
+      "operations": [
+        {
+          "productDiscountsAdd": {
+            "candidates": [
+              {
+                "message": "3 for £55",
+                "targets": [{ "cartLine": { "id": "gid://shopify/CartLine/1", "quantity": 3 } }],
+                "value": { "fixedAmount": { "amount": "20.00", "appliesToEachItem": false } }
+              }
+            ],
+            "selectionStrategy": "ALL"
+          }
+        }
+      ]
+    }
+  }
+}

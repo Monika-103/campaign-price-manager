@@ -1,0 +1,24 @@
+api_version = "2026-07"
+
+[[extensions]]
+name = "t:name"
+handle = "bundle-price-discount"
+type = "function"
+uid = "370b25cb-f5fe-faa6-1633-ef18dbf4feef6e0d85ac"
+description = "t:description"
+
+  # Only product discounts: "buy N for a fixed price" never touches shipping.
+  [[extensions.targeting]]
+  target = "cart.lines.discounts.generate.run"
+  input_query = "src/cart_lines_discounts_generate_run.graphql"
+  export = "cart-lines-discounts-generate-run"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  # Top-level keys of the discount's configuration metafield become variables
+  # in the input query -- here, `collectionIds`.
+  [extensions.input.variables]
+  namespace = "$app"
+  key = "function-configuration"

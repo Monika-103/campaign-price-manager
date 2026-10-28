@@ -1,0 +1,72 @@
+{
+  "payload": {
+    "export": "cart-lines-discounts-generate-run",
+    "target": "cart.lines.discounts.generate.run",
+    "input": {
+      "presentmentCurrencyRate": "1.0",
+      "cart": {
+        "lines": [
+          {
+            "id": "gid://shopify/CartLine/1",
+            "quantity": 2,
+            "cost": {
+              "amountPerQuantity": {
+                "amount": "20.0"
+              }
+            },
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": {
+                "id": "gid://shopify/Product/1",
+                "inAnyCollection": false
+              }
+            }
+          },
+          {
+            "id": "gid://shopify/CartLine/2",
+            "quantity": 1,
+            "cost": {
+              "amountPerQuantity": {
+                "amount": "15.0"
+              }
+            },
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": {
+                "id": "gid://shopify/Product/9",
+                "inAnyCollection": false
+              }
+            }
+          }
+        ]
+      },
+      "discount": {
+        "discountClasses": [
+          "PRODUCT"
+        ],
+        "metafield": {
+          "jsonValue": {
+            "type": "GIFT",
+            "threshold": "SPEND",
+            "minSpend": "50.00",
+            "quantity": 0,
+            "giftPrice": "1.00",
+            "giftsPerSet": 1,
+            "repeat": false,
+            "giftProductIds": [
+              "gid://shopify/Product/9"
+            ],
+            "productIds": [
+              "gid://shopify/Product/1"
+            ],
+            "collectionIds": [],
+            "message": "Spend $50, get a tote for $1"
+          }
+        }
+      }
+    },
+    "output": {
+      "operations": []
+    }
+  }
+}

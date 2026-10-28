@@ -1,0 +1,63 @@
+/*
+ * Styling for the public pages -- the sign-in page and the auth screens.
+ *
+ * The embedded admin app does not need any of this: Polaris web components
+ * bring their own typography and colour. These rules only cover the pages a
+ * visitor can reach outside the Shopify admin.
+ *
+ * root.jsx loads Inter's @font-face definitions from Shopify's CDN, but that
+ * only makes the family available -- nothing applied it, which is why these
+ * pages fell back to the browser's default serif.
+ */
+
+:root {
+  --cpm-text: #1a1a1a;
+  --cpm-text-subdued: #616161;
+  --cpm-border: #d0d0d0;
+  --cpm-surface: #ffffff;
+  --cpm-background: #f7f7f7;
+  --cpm-accent: #1a1a1a;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  /* Inter is served by root.jsx; the rest is the standard system stack so the
+     page still looks intentional if the CDN is unreachable. */
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--cpm-text);
+  background: var(--cpm-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root,
+body > div {
+  height: 100%;
+}
+
+h1 {
+  font-size: 2.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+}
+
+a {
+  color: inherit;
+}
+
+input,
+button {
+  font: inherit;
+}

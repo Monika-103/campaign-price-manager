@@ -1,0 +1,32 @@
+# $collectionIds comes from the discount's configuration metafield (see
+# [extensions.input.variables] in shopify.extension.toml), so the function only
+# asks Shopify about the collections this particular discount covers.
+query CartInput($collectionIds: [ID!]) {
+  presentmentCurrencyRate
+  cart {
+    lines {
+      id
+      quantity
+      cost {
+        amountPerQuantity {
+          amount
+        }
+      }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          product {
+            id
+            inAnyCollection(ids: $collectionIds)
+          }
+        }
+      }
+    }
+  }
+  discount {
+    discountClasses
+    metafield(namespace: "$app", key: "function-configuration") {
+      jsonValue
+    }
+  }
+}

@@ -32,3 +32,182 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+// ---------------------------------------------------------------------------
+// Campaign Price Manager
+//
+// SQLite has no native enum support, so the status/action columns below are
+// plain strings. Their allowed values live in app/models/campaign.constants.js,
+// which is the single source of truth -- never type these values inline.
+// ---------------------------------------------------------------------------
+
+model Campaign {
+  id          String   @id @default(cuid())
+  shop        String
+  // CAMPAIGN   -- a temporary offer; originals are snapshotted and restorable.
+  // PRICE_UPDATE -- a permanent change to the normal price, undoable but not
+  //               time-bound and never treated as an active offer.
+  kind        String   @default("CAMPAIGN")
+  name        String
+  description String?
+
+  // DRAFT | SCHEDULED | ACTIVE | COMPLETED | ROLLING_BACK | ROLLED_BACK | FAILED
+  status      String   @default("DRAFT")
+
+  startAt     DateTime
+  // Optional: an open-ended campaign runs until it is rolled back by hand.
+  endAt       DateTime?
+
+  // MANUAL | PERCENTAGE | SELLING_TO_COMPARE | COMPARE_TO_SELLING
+  priceAction String
+
+  // PRICE | COMPARE_AT -- the field a rule calculates from
+  applyTo     String   @default("PRICE")
+
+  // Percentage for PERCENTAGE, a currency amount for MANUAL, unused otherwise.
+  value       Float?
+
+  // NONE | END_99 | END_95 | WHOLE
+  rounding    String   @default("NONE")
+
+  // How the products were chosen: PRODUCTS | COLLECTIONS | SKUS.
+  selectionMode String @default("PRODUCTS")
+  // Human-readable note about the selection, e.g. "3 collections" or "42 SKUs".
+  selectionNote String?
+  // The selection itself, as JSON, kept for a SCHEDULED campaign. Its prices
+  // are worked out when it starts rather than when it was saved, so the
+  // selection has to survive until then.
+  selectionData String?
+  // Whether the merchant chose to take over variants held by another campaign.
+  // Replayed at start time along with the selection.
+  takeOver      Boolean @default(false)
+
+  // The staff member who ran this, captured from the online session so the
+  // change log can say who changed a price rather than only when.
+  actorName  String?
+  actorEmail String?
+
+  productCount Int     @default(0)
+  variantCount Int     @default(0)
+  updatedCount Int     @default(0)
+  failedCount  Int     @default(0)
+
+  appliedAt    DateTime?
+  rolledBackAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       CampaignItem[]
+  logs        CampaignLog[]
+
+  @@index([shop, status])
+  @@index([shop, createdAt])
+}
+
+// One row per variant in the campaign, holding the price it had before the
+// campaign touched it. This is what makes a rollback possible even if the rule
+// that produced the new price is later changed.
+model CampaignItem {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  productId    String
+  variantId    String
+  productTitle String
+  variantTitle String?
+  sku          String?
+
+  originalPrice     String
+  originalCompareAt String?
+  newPrice          String?
+  newCompareAt      String?
+
+  // PENDING | UPDATED | FAILED | RESTORED
+  status String  @default("PENDING")
+  error  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, variantId])
+  @@index([campaignId, status])
+}
+
+model CampaignLog {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // INFO | SUCCESS | WARNING | ERROR
+  level     String   @default("INFO")
+  message   String
+
+  // Null for entries the app wrote on its own behalf rather than a person.
+  actorName  String?
+  actorEmail String?
+  createdAt DateTime @default(now())
+
+  @@index([campaignId, createdAt])
+}
+
+// A "buy N for a fixed price" offer, e.g. any 3 for 55.
+//
+// The discount itself lives in Shopify as an automatic app discount, worked
+// out at checkout by the bundle-price-discount function. Shopify starts and
+// ends it on its own dates. This row is the app's record of it: what was set
+// up, by whom, and the Shopify ID to end or delete it with.
+model BundleDiscount {
+  id                String    @id @default(cuid())
+  shop              String
+  shopifyDiscountId String?
+  title             String
+
+  // AUTOMATIC applies by itself in the cart; CODE needs the customer to enter
+  // `code` at checkout; LINK is a code discount switched on only by opening
+  // its discount link, which then lands the customer on `landingPath`.
+  // Usage limits apply to CODE and LINK.
+  method          String  @default("AUTOMATIC")
+  code            String?
+  landingPath     String?
+  usageLimit      Int?
+  oncePerCustomer Boolean @default(false)
+
+  // BUNDLE -- buy `quantity` items for `bundlePrice` together.
+  // GIFT   -- buy `quantity` items, get a `giftProduct` item for `giftPrice`.
+  kind String @default("BUNDLE")
+
+  // Items to buy: per bundle, or to earn the gift.
+  quantity    Int
+  // What one bundle costs in the shop's currency. Bundles only.
+  bundlePrice String?
+
+  // Gifts only. The gift product as JSON { id, title }, the price it drops
+  // to, and whether every `quantity` bought earns another gift (true) or the
+  // gift is once per order (false).
+  giftProduct String?
+  giftPrice   String?
+  giftRepeats Boolean @default(false)
+  // What earns the gift: ITEMS (buy `quantity` qualifying items) or SPEND
+  // (spend `minSpend`, shop currency, on qualifying items).
+  giftThreshold String  @default("ITEMS")
+  minSpend      String?
+
+  // PRODUCTS | COLLECTIONS, and the chosen ones as JSON [{ id, title }].
+  selectionMode String
+  selection     String
+
+  startsAt DateTime
+  endsAt   DateTime?
+  // Set when the discount is ended early by hand.
+  endedAt  DateTime?
+
+  actorName  String?
+  actorEmail String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shop, createdAt])
+}
